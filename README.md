@@ -169,16 +169,20 @@ results(env, optimal_pi, goal_state=goal_state)
 ## OUTPUT:
 
 ### Optimal Value Function:
-![image](https://github.com/Aashima02/monte-carlo-control/assets/93427086/dd56d8c7-7471-4612-9039-9ca6969cdebc)
+![image](https://github.com/swethamohanraj/convolutional-denoising-autoencoder/assets/94228215/8cea2712-7288-4049-85cd-6a10441eaa58)
 
 ### Action Value Function:
-![image](https://github.com/Aashima02/monte-carlo-control/assets/93427086/da14aa9f-0663-4a22-a735-58ed5220d6a9)
+![image](https://github.com/swethamohanraj/convolutional-denoising-autoencoder/assets/94228215/5bdf6d23-9126-4eb8-a76e-18bc0069efaf)
+
 
 ### State Value Function:
-![image](https://github.com/Aashima02/monte-carlo-control/assets/93427086/89c6a600-3cba-45d9-8d43-2c50ac5a0ba3)
+![image](https://github.com/swethamohanraj/convolutional-denoising-autoencoder/assets/94228215/01999945-59bc-4594-a92c-a3c6278af6e6)
+
 
 ### Success Rate for Optimal Policy:
-![image](https://github.com/Aashima02/monte-carlo-control/assets/93427086/cdf40391-cf85-41f9-8325-db96a63c7ef1)
+![image](https://github.com/swethamohanraj/convolutional-denoising-autoencoder/assets/94228215/6fcb915d-5a28-4a16-bee2-75470efb57a0)
+
+
 
 ## RESULT:
 
