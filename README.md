@@ -12,8 +12,8 @@ We are using MNIST Dataset for this experiment. The MNIST dataset is a collectio
 
 
 ## Convolution Autoencoder Network Model:
+![WhatsApp Image 2023-10-23 at 12 20 51_ea1e4ca1](https://github.com/swethamohanraj/convolutional-denoising-autoencoder/assets/94228215/9c8296fc-f787-42d3-bec4-f69fe311379f)
 
-![image](https://github.com/Aashima02/convolutional-denoising-autoencoder/assets/93427086/ac3f0447-d648-40a2-9604-e062451416ed)
 
 
 ## DESIGN STEPS
@@ -37,7 +37,7 @@ Make sure the input shape and output shape of the model are identical.
 ## PROGRAM
 
 ### Import necessary libraries:
-python
+```python
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -45,10 +45,10 @@ import matplotlib.pyplot as plt
 from tensorflow import keras
 from tensorflow.keras import layers, utils, models
 from tensorflow.keras.datasets import mnist
-
+```
 
 ### Read the dataset and scale it:
-python
+```python
 (x_train, _), (x_test, _) = mnist.load_data()
 
 x_train.shape
@@ -58,20 +58,20 @@ x_test_scaled = x_test.astype('float32') / 255.
 
 x_train_scaled = np.reshape(x_train_scaled, (len(x_train_scaled), 28, 28, 1))
 x_test_scaled = np.reshape(x_test_scaled, (len(x_test_scaled), 28, 28, 1))
-
+```
 
 ### Add noise to image:
-python
+```python
 noise_factor = 0.5
 x_train_noisy = x_train_scaled + noise_factor * np.random.normal(loc=0.0, scale=1.0, size=x_train_scaled.shape)
 x_test_noisy = x_test_scaled + noise_factor * np.random.normal(loc=0.0, scale=1.0, size=x_test_scaled.shape)
 
 x_train_noisy = np.clip(x_train_noisy, 0., 1.)
 x_test_noisy = np.clip(x_test_noisy, 0., 1.)
-
+```
 
 ### Plot the images:
-python
+```python
 n = 10
 plt.figure(figsize=(20, 2))
 for i in range(1, n + 1):
@@ -82,39 +82,36 @@ for i in range(1, n + 1):
     ax.get_yaxis().set_visible(False)
 plt.show()
 
-
+```
 ### Develop an Autoencoder DL Model
-python
+```python
 input_img = keras.Input(shape=(28, 28, 1))
 
-x=layers.Conv2D(16,(5,5),activation='relu',padding='same')(input_img)
+x=layers.Conv2D(8,(5,5),activation='relu',padding='same')(input_img)
 x=layers.MaxPooling2D((2,2),padding='same')(x)
-x=layers.Conv2D(4,(3,3),activation='relu',padding='same')(x)
+x=layers.Conv2D(8,(5,5),activation='relu',padding='same')(x)
 x=layers.MaxPooling2D((2,2),padding='same')(x)
-x=layers.Conv2D(4,(3,3),activation='relu',padding='same')(x)
+x=layers.Conv2D(8,(3,3),activation='relu',padding='same')(x)
 x=layers.MaxPooling2D((2,2),padding='same')(x)
 x=layers.Conv2D(8,(7,7),activation='relu',padding='same')(x)
 encoded = layers.MaxPooling2D((2, 2), padding='same')(x)
 
-x=layers.Conv2D(4,(3,3),activation='relu',padding='same')(encoded)
-x=layers.UpSampling2D((2,2))(x)
-x=layers.Conv2D(4,(3,3),activation='relu',padding='same')(x)
+x=layers.Conv2D(8,(3,3),activation='relu',padding='same')(encoded)
 x=layers.UpSampling2D((2,2))(x)
 x=layers.Conv2D(8,(5,5),activation='relu',padding='same')(x)
 x=layers.UpSampling2D((2,2))(x)
-x=layers.Conv2D(16,(5,5),activation='relu',padding='same')(x)
+x=layers.Conv2D(16,(3,3),activation='relu',padding='same')(x)
 x=layers.UpSampling2D((2,2))(x)
-x=layers.Conv2D(16,(5,5),activation='relu')(x)
-x=layers.UpSampling2D((1,1))(x)
+x=layers.Conv2D(8,(3,3),activation='relu')(x)
+x=layers.UpSampling2D((2,2))(x)
 decoded = layers.Conv2D(1, (3, 3), activation='sigmoid', padding='same')(x)
 
 autoencoder = keras.Model(input_img, decoded)
-
 autoencoder.summary()
 
-
+```
 ### Compile and Fit the model:
-python
+```python
 autoencoder.compile(optimizer='adam', loss='binary_crossentropy')
 
 autoencoder.fit(x_train_noisy, x_train_scaled,
@@ -123,20 +120,20 @@ autoencoder.fit(x_train_noisy, x_train_scaled,
                 shuffle=True,
                 validation_data=(x_test_noisy, x_test_scaled))
 
-
+```
 ### Plot Metrics Graph:
-python
+```python
 metrics = pd.DataFrame(autoencoder.history.history)
 metrics[['loss','val_loss']].plot()
-
+```
 
 ### Predict Using the model:
-python
+```python
 decoded_imgs = autoencoder.predict(x_test_noisy)
-
+```
 
 ### Plot the original, noisy & reconstructed images:
-python
+```python
 n = 10
 plt.figure(figsize=(20, 4))
 for i in range(1, n + 1):
@@ -162,7 +159,7 @@ for i in range(1, n + 1):
     ax.get_yaxis().set_visible(False)
 plt.show()
 
-
+```
 
 ## OUTPUT
 
