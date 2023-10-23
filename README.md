@@ -174,15 +174,11 @@ results(env, optimal_pi, goal_state=goal_state)
 ### Action Value Function:
 ![image](https://github.com/swethamohanraj/convolutional-denoising-autoencoder/assets/94228215/5bdf6d23-9126-4eb8-a76e-18bc0069efaf)
 
-
 ### State Value Function:
 ![image](https://github.com/swethamohanraj/convolutional-denoising-autoencoder/assets/94228215/01999945-59bc-4594-a92c-a3c6278af6e6)
 
-
 ### Success Rate for Optimal Policy:
 ![image](https://github.com/swethamohanraj/convolutional-denoising-autoencoder/assets/94228215/b8c28056-9c53-49d4-ab8f-ad28dfd8d4d1)
-
-
 
 
 ## RESULT:
