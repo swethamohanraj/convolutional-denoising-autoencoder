@@ -180,7 +180,8 @@ results(env, optimal_pi, goal_state=goal_state)
 
 
 ### Success Rate for Optimal Policy:
-![image](https://github.com/swethamohanraj/convolutional-denoising-autoencoder/assets/94228215/6fcb915d-5a28-4a16-bee2-75470efb57a0)
+![image](https://github.com/swethamohanraj/convolutional-denoising-autoencoder/assets/94228215/b8c28056-9c53-49d4-ab8f-ad28dfd8d4d1)
+
 
 
 
