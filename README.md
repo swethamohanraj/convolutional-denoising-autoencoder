@@ -1,186 +1,182 @@
-# MONTE CARLO CONTROL ALGORITHM
+# Convolutional Autoencoder for Image Denoising
 
 ## AIM:
-To develop a Python program to find the optimal policy for the given RL environment using the Monte Carlo algorithm.
 
-## PROBLEM STATEMENT:
-The FrozenLake environment in OpenAI Gym is a gridworld problem that challenges reinforcement learning agents to navigate a slippery terrain to reach a goal state while avoiding hazards. Note that the environment is closed with a fence, so the agent cannot leave the gridworld.
+To develop a convolutional autoencoder for image denoising application.
 
-### States:
+## Problem Statement and Dataset:
 
-* 5 Terminal States:
-  * G (Goal): The state the agent aims to reach.
-  * H (Hole): A hazardous state that the agent must avoid at all costs.
-* 11 Non-terminal States:
-  * S (Starting state): The initial position of the agent.
-  * Intermediate states: Grid cells forming a layout that the agent must traverse.
-
-### Actions:
-The agent has 4 possible actions:
-
-* 0: Left
-* 1: Down
-* 2: Right
-* 3: Up
-
-### Transition Probabilities:
-Slippery surface with a 33.3% chance of moving as intended and a 66.6% chance of moving in orthogonal directions. For example, if the agent intends to move left, there is a
-
-* 33.3% chance of moving left, a
-* 33.3% chance of moving down, and a
-* 33.3% chance of moving up.
-
-### Rewards:
-The agent receives a reward of 1 for reaching the goal state, and a reward of 0 otherwise.
-
-### Graphical Representation:
-![275263001-7be7c0fe-f7f7-4b38-809c-405c7b463985](https://github.com/Aashima02/monte-carlo-control/assets/93427086/a60f5e62-fc31-431d-85cc-a41ca168010c)
+Autoencoder is an unsupervised artificial neural network that is trained to copy its input to output. An autoencoder will first encode the image into a lower-dimensional representation, then decodes the representation back to the image.The goal of an autoencoder is to get an output that is identical to the input. Autoencoders uses MaxPooling, convolutional and upsampling layers to denoise the image.
+We are using MNIST Dataset for this experiment. The MNIST dataset is a collection of handwritten digits. The task is to classify a given image of a handwritten digit into one of 10 classes representing integer values from 0 to 9, inclusively. The dataset has a collection of 60,000 handwrittend digits of size 28 X 28. Here we build a convolutional neural network model that is able to classify to it's appropriate numerical value.
+![201967502-00818ac7-4523-46e2-a3be-659758793752](https://github.com/Aashima02/convolutional-denoising-autoencoder/assets/93427086/86b704d0-cd8f-4a7a-9672-6709713a350b)
 
 
-## MONTE CARLO CONTROL ALGORITHM:
-1. Initialize the state value function V(s) and the policy π(s) arbitrarily.
+## Convolution Autoencoder Network Model:
 
-2. Generate an episode using π(s) and store the state, action, and reward sequence.
+![image](https://github.com/Aashima02/convolutional-denoising-autoencoder/assets/93427086/ac3f0447-d648-40a2-9604-e062451416ed)
 
-3. For each state s appearing in the episode:
-  * G ← return following the first occurrence of s
-  * Append G to Returns(s)
-  * V(s) ← average(Returns(s))
 
-4. For each state s in the episode:
-  * π(s) ← argmax_a ∑_s' P(s'|s,a)V(s')
+## DESIGN STEPS
 
-5. Repeat steps 2-4 until the policy converges.
+1. Import the necessary libraries and dataset.
 
-6. Use the function decay_schedule to decay the value of epsilon and alpha.
+2. Load the dataset and scale the values for easier computation.
 
-7. Use the function gen_traj to generate a trajectory.
+3. Add noise to the images randomly for both the train and test sets.
 
-8. Use the function tqdm to display the progress bar.
+4. Build the Neural Model using
 
-9. After the policy converges, use the function np.argmax to find the optimal policy. The function takes the following arguments:
-  * Q: The Q-table.
-  * axis: The axis along which to find the maximum value.
+* Convolutional Layer
+* Pooling Layer
+* Up Sampling Layer.
+Make sure the input shape and output shape of the model are identical.
+5. Pass test data for validating manually.
 
-## MONTE CARLO CONTROL FUNCTION
-```python
+6. Plot the predictions for visualization.
+
+## PROGRAM
+
+### Import necessary libraries:
+python
+import pandas as pd
 import numpy as np
-from tqdm import tqdm
+import matplotlib.pyplot as plt
 
-def mc_control(env, gamma=1.0, init_alpha=0.5, min_alpha=0.01, alpha_decay_ratio=0.5,
-               init_epsilon=1.0, min_epsilon=0.1, epsilon_decay_ratio=0.9,
-               n_episodes=3000, max_steps=200, first_visit=True):
-
-    # Get the number of states and actions
-    nS, nA = env.observation_space.n, env.action_space.n
-
-    # Create an array for discounting
-    disc = np.logspace(0, max_steps, num=max_steps, base=gamma, endpoint=False)
-
-    def decay_schedule(init_value, min_value, decay_ratio, n):
-        return np.maximum(min_value, init_value * (decay_ratio ** np.arange(n))
-
-    # Create schedules for alpha and epsilon decay
-    alphas = decay_schedule(init_alpha, min_alpha, alpha_decay_ratio, n_episodes)
-    epsilons = decay_schedule(init_epsilon, min_epsilon, epsilon_decay_ratio, n_episodes)
-
-    # Initialize Q-table and tracking array
-    Q = np.zeros((nS, nA), dtype=np.float64)
-    Q_track = np.zeros((n_episodes, nS, nA), dtype=np.float64)
-
-    def select_action(state, Q, epsilon):
-        return np.argmax(Q[state]) if np.random.random()>epsilon else np.random.randint(nA)
-
-    for e in tqdm(range(n_episodes), leave=False):
-        # Generate a trajectory
-        traj = gen_traj(select_action, Q, epsilons[e], env, max_steps)
-        visited = np.zeros((nS, nA), dtype=np.bool)
-
-        for t, (state, action, reward, _, _) in enumerate(traj):
-            if visited[state][action] and first_visit:
-                continue
-            visited[state][action] = True
-
-            n_steps = len(traj[t:])
-            G = np.sum(disc[:n_steps] * traj[t:, 2])
-            Q[state][action] = Q[state][action] + alphas[e] * (G - Q[state][action])
-
-        Q_track[e] = Q
-
-    # Calculate the value function and policy
-    V = np.max(Q, axis=1)
-    pi = {s: np.argmax(Q[s]) for s in range(nS)}
-
-    return Q, V, pi
-```
-
-## PROGRAM TO EVALUATE THE POLICY:
-```python
-import random
-import numpy as np
-
-def probability_success(env, pi, goal_state, n_episodes=100, max_steps=200, seed=123):
-    random.seed(seed)
-    np.random.seed(seed)
-    env.seed(seed)
-    results = []
-
-    for _ in range(n_episodes):
-        state, done, steps = env.reset(), False, 0
-        while not done and steps < max_steps:
-            action = pi[state]
-            state, _, done, _ = env.step(action)
-            steps += 1
-        results.append(state == goal_state)
-
-    success_rate = np.sum(results) / len(results)
-    return success_rate
-
-def mean_return(env, pi, n_episodes=100, max_steps=200, seed=123):
-    random.seed(seed)
-    np.random.seed(seed)
-    env.seed(seed)
-    results = []
-
-    for _ in range(n_episodes):
-        state, done, steps = env.reset(), False, 0
-        returns = 0.0
-        while not done and steps < max_steps:
-            action = pi[state]
-            state, reward, done, _ = env.step(action)
-            returns += reward
-            steps += 1
-        results.append(returns)
-
-    average_return = np.mean(results)
-    return average_return
-
-def results(env, optimal_pi, goal_state, seed=123):
-    success_rate = probability_success(env, optimal_pi, goal_state=goal_state, seed=seed)
-    avg_return = mean_return(env, optimal_pi, seed=seed)
-    
-    print(f'Reaches goal {success_rate:.2%}. 
-  			Obtains an average undiscounted return of: {avg_return:.4f}.')
-
-goal_state = 15
-results(env, optimal_pi, goal_state=goal_state)
-```
-
-## OUTPUT:
-
-### Optimal Value Function:
-![image](https://github.com/swethamohanraj/convolutional-denoising-autoencoder/assets/94228215/8cea2712-7288-4049-85cd-6a10441eaa58)
-
-### Action Value Function:
-![image](https://github.com/swethamohanraj/convolutional-denoising-autoencoder/assets/94228215/5bdf6d23-9126-4eb8-a76e-18bc0069efaf)
-
-### State Value Function:
-![image](https://github.com/swethamohanraj/convolutional-denoising-autoencoder/assets/94228215/01999945-59bc-4594-a92c-a3c6278af6e6)
-
-### Success Rate for Optimal Policy:
-![image](https://github.com/swethamohanraj/convolutional-denoising-autoencoder/assets/94228215/b8c28056-9c53-49d4-ab8f-ad28dfd8d4d1)
+from tensorflow import keras
+from tensorflow.keras import layers, utils, models
+from tensorflow.keras.datasets import mnist
 
 
-## RESULT:
+### Read the dataset and scale it:
+python
+(x_train, _), (x_test, _) = mnist.load_data()
 
-Thus a Python program is developed to find the optimal policy for the given RL environment using the Monte Carlo algorithm.
+x_train.shape
+
+x_train_scaled = x_train.astype('float32') / 255.
+x_test_scaled = x_test.astype('float32') / 255.
+
+x_train_scaled = np.reshape(x_train_scaled, (len(x_train_scaled), 28, 28, 1))
+x_test_scaled = np.reshape(x_test_scaled, (len(x_test_scaled), 28, 28, 1))
+
+
+### Add noise to image:
+python
+noise_factor = 0.5
+x_train_noisy = x_train_scaled + noise_factor * np.random.normal(loc=0.0, scale=1.0, size=x_train_scaled.shape)
+x_test_noisy = x_test_scaled + noise_factor * np.random.normal(loc=0.0, scale=1.0, size=x_test_scaled.shape)
+
+x_train_noisy = np.clip(x_train_noisy, 0., 1.)
+x_test_noisy = np.clip(x_test_noisy, 0., 1.)
+
+
+### Plot the images:
+python
+n = 10
+plt.figure(figsize=(20, 2))
+for i in range(1, n + 1):
+    ax = plt.subplot(1, n, i)
+    plt.imshow(x_test_noisy[i].reshape(28, 28))
+    plt.gray()
+    ax.get_xaxis().set_visible(False)
+    ax.get_yaxis().set_visible(False)
+plt.show()
+
+
+### Develop an Autoencoder DL Model
+python
+input_img = keras.Input(shape=(28, 28, 1))
+
+x=layers.Conv2D(16,(5,5),activation='relu',padding='same')(input_img)
+x=layers.MaxPooling2D((2,2),padding='same')(x)
+x=layers.Conv2D(4,(3,3),activation='relu',padding='same')(x)
+x=layers.MaxPooling2D((2,2),padding='same')(x)
+x=layers.Conv2D(4,(3,3),activation='relu',padding='same')(x)
+x=layers.MaxPooling2D((2,2),padding='same')(x)
+x=layers.Conv2D(8,(7,7),activation='relu',padding='same')(x)
+encoded = layers.MaxPooling2D((2, 2), padding='same')(x)
+
+x=layers.Conv2D(4,(3,3),activation='relu',padding='same')(encoded)
+x=layers.UpSampling2D((2,2))(x)
+x=layers.Conv2D(4,(3,3),activation='relu',padding='same')(x)
+x=layers.UpSampling2D((2,2))(x)
+x=layers.Conv2D(8,(5,5),activation='relu',padding='same')(x)
+x=layers.UpSampling2D((2,2))(x)
+x=layers.Conv2D(16,(5,5),activation='relu',padding='same')(x)
+x=layers.UpSampling2D((2,2))(x)
+x=layers.Conv2D(16,(5,5),activation='relu')(x)
+x=layers.UpSampling2D((1,1))(x)
+decoded = layers.Conv2D(1, (3, 3), activation='sigmoid', padding='same')(x)
+
+autoencoder = keras.Model(input_img, decoded)
+
+autoencoder.summary()
+
+
+### Compile and Fit the model:
+python
+autoencoder.compile(optimizer='adam', loss='binary_crossentropy')
+
+autoencoder.fit(x_train_noisy, x_train_scaled,
+                epochs=3,
+                batch_size=256,
+                shuffle=True,
+                validation_data=(x_test_noisy, x_test_scaled))
+
+
+### Plot Metrics Graph:
+python
+metrics = pd.DataFrame(autoencoder.history.history)
+metrics[['loss','val_loss']].plot()
+
+
+### Predict Using the model:
+python
+decoded_imgs = autoencoder.predict(x_test_noisy)
+
+
+### Plot the original, noisy & reconstructed images:
+python
+n = 10
+plt.figure(figsize=(20, 4))
+for i in range(1, n + 1):
+    # Display original
+    ax = plt.subplot(3, n, i)
+    plt.imshow(x_test_scaled[i].reshape(28, 28))
+    plt.gray()
+    ax.get_xaxis().set_visible(False)
+    ax.get_yaxis().set_visible(False)
+
+    # Display noisy
+    ax = plt.subplot(3, n, i+n)
+    plt.imshow(x_test_noisy[i].reshape(28, 28))
+    plt.gray()
+    ax.get_xaxis().set_visible(False)
+    ax.get_yaxis().set_visible(False)    
+
+    # Display reconstruction
+    ax = plt.subplot(3, n, i + 2*n)
+    plt.imshow(decoded_imgs[i].reshape(28, 28))
+    plt.gray()
+    ax.get_xaxis().set_visible(False)
+    ax.get_yaxis().set_visible(False)
+plt.show()
+
+
+
+## OUTPUT
+
+### Training Loss, Validation Loss Vs Iteration Plot:
+![image](https://github.com/Aashima02/convolutional-denoising-autoencoder/assets/93427086/05f4d648-6803-4f42-825d-f7d79b8e0ca1)
+
+
+
+### Original vs Noisy Vs Reconstructed Image:
+
+![image](https://github.com/Aashima02/convolutional-denoising-autoencoder/assets/93427086/8b9d57f2-1341-43ee-b54d-70b220d81488)
+
+
+
+
+## RESULT
+Thus we have successfully developed a convolutional autoencoder for image denoising application.
